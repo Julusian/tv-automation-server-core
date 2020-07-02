@@ -961,6 +961,16 @@ export function mongoWhere<T>(o: any, selector: MongoQuery<T>): boolean {
 				} else {
 					ok = false
 				}
+			} else if (key === '$and') {
+				if (_.isArray(s)) {
+					let ok2 = true
+					_.each(s, (innerSelector) => {
+						ok2 = ok2 && mongoWhere(o, innerSelector)
+					})
+					ok = ok2
+				} else {
+					throw new Error('An $and filter must be an array')
+				}
 			} else if (key === '$or') {
 				if (_.isArray(s)) {
 					let ok2 = false

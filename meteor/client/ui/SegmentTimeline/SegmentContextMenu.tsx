@@ -45,18 +45,18 @@ export const SegmentContextMenu = withTranslation()(
 						{part && !part.instance.part.invalid && timecode !== null && (
 							<React.Fragment>
 								{startsAt !== null && (
-									<MenuItem onClick={(e) => this.props.onSetNext(part.instance.part, e)} disabled={isCurrentPart}>
+									<MenuItem onClick={(e) => this.props.onSetNext(part.instance.part, e)}>
 										<span dangerouslySetInnerHTML={{ __html: t('Set this part as <strong>Next</strong>') }}></span> (
 										{RundownUtils.formatTimeToShortTime(Math.floor(startsAt / 1000) * 1000)})
 									</MenuItem>
 								)}
 								{startsAt !== null && part && this.props.enablePlayFromAnywhere ? (
 									<React.Fragment>
-										<MenuItem onClick={(e) => this.onSetAsNextFromHere(part.instance.part, e)} disabled={isCurrentPart}>
+										<MenuItem onClick={(e) => this.onSetAsNextFromHere(part.instance.part, e)}>
 											<span dangerouslySetInnerHTML={{ __html: t('Set <strong>Next</strong> Here') }}></span> (
 											{RundownUtils.formatTimeToShortTime(Math.floor((startsAt + timecode) / 1000) * 1000)})
 										</MenuItem>
-										<MenuItem onClick={(e) => this.onPlayFromHere(part.instance.part, e)} disabled={isCurrentPart}>
+										<MenuItem onClick={(e) => this.onPlayFromHere(part.instance.part, e)}>
 											<span dangerouslySetInnerHTML={{ __html: t('Play from Here') }}></span> (
 											{RundownUtils.formatTimeToShortTime(Math.floor((startsAt + timecode) / 1000) * 1000)})
 										</MenuItem>

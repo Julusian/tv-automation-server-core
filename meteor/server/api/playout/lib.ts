@@ -495,9 +495,9 @@ export function setNextPart(
 		}
 
 		if (newNextPart) {
-			if (currentPartInstance && newNextPart._id === currentPartInstance.part._id) {
-				throw new Meteor.Error(402, 'Not allowed to Next the currently playing Part')
-			}
+			// if (currentPartInstance && newNextPart._id === currentPartInstance.part._id) {
+			// 	throw new Meteor.Error(402, 'Not allowed to Next the currently playing Part')
+			// }
 
 			// If this is a part being copied, then reset and reload it (so that we copy the new, not old data)
 			// TODO-PartInstances - pending new data flow
@@ -509,7 +509,7 @@ export function setNextPart(
 			}
 		} else if (newNextPartInstance) {
 			if (currentPartInstance && newNextPartInstance._id === currentPartInstance._id) {
-				throw new Meteor.Error(402, 'Not allowed to Next the currently playing Part')
+				throw new Meteor.Error(402, 'Not allowed to Next the currently playing Part Instance')
 			}
 		}
 
@@ -519,7 +519,11 @@ export function setNextPart(
 		let newInstanceId: PartInstanceId
 		if (newNextPartInstance) {
 			newInstanceId = newNextPartInstance._id
-		} else if (nextPartInstance && nextPartInstance.part._id === nextPart._id) {
+		} else if (
+			nextPartInstance &&
+			nextPartInstance.part._id === nextPart._id &&
+			nextPartInstance.part._id !== currentPartInstance?.part._id
+		) {
 			// Re-use existing
 			newInstanceId = nextPartInstance._id
 		} else {
@@ -557,10 +561,20 @@ export function setNextPart(
 			})
 		}
 
-		// reset any previous instances of this part
+		// reset any previous instances of this part, but not the current playing part
 		cache.PartInstances.update(
 			{
-				_id: { $ne: newInstanceId },
+				_id: {
+					//@ts-ignore
+					$and: [
+						{
+							$ne: newInstanceId,
+						},
+						{
+							$ne: currentPartInstance?._id,
+						},
+					],
+				},
 				rundownId: nextPart.rundownId,
 				'part._id': nextPart._id,
 				reset: { $ne: true },
@@ -573,7 +587,17 @@ export function setNextPart(
 		)
 		cache.PieceInstances.update(
 			{
-				partInstanceId: { $ne: newInstanceId },
+				partInstanceId: {
+					//@ts-ignore
+					$and: [
+						{
+							$ne: newInstanceId,
+						},
+						{
+							$ne: currentPartInstance?._id,
+						},
+					],
+				},
 				rundownId: nextPart.rundownId,
 				'piece.partId': nextPart._id,
 				reset: { $ne: true },
