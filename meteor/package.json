@@ -7,9 +7,11 @@
   },
   "scripts": {
     "start": "meteor --version && meteor npm install && meteor npm run dev",
-    "dev": "concurrently --prefix \"[{name}]\" --names \"METEOR,TSC\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run debug --\" \"npm run watch-types -- --preserveWatchOutput\"",
+    "dev": "npm run libs:build && concurrently --prefix \"[{name}]\" --names \"METEOR,TSC\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run debug --\" \"npm run watch-types -- --preserveWatchOutput\"",
     "debug": "meteor run --inspect",
-    "postinstall": "meteor npm run prepareForTest",
+    "libs:build": "cd ../packages && yarn build",
+    "libs:install": "cd ../packages && yarn",
+    "postinstall": "meteor npm run prepareForTest && meteor npm run libs:install",
     "prepareForTest": "node ../scripts/fixTestFibers.js",
     "unit": "jest",
     "unitci": "jest --maxWorkers 2 --coverage",
