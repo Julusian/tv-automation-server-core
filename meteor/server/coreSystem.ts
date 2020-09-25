@@ -283,7 +283,7 @@ function checkBlueprintCompability(blueprint: Blueprint) {
 
 	let integrationStatus = checkDatabaseVersion(
 		parseVersion(blueprint.integrationVersion || '0.0.0'),
-		parseRange(PackageInfo.dependencies['tv-automation-sofie-blueprints-integration']),
+		'^0.0.0', //parseRange(PackageInfo.dependencies['tv-automation-sofie-blueprints-integration']), // TODO-MONOREPO
 		'Blueprint has to be updated',
 		'blueprint.integrationVersion',
 		'core.tv-automation-sofie-blueprints-integration'
