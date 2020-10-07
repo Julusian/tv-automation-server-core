@@ -108,6 +108,7 @@ export class Rundown implements DBRundown {
 	public externalId: string
 	public organizationId: OrganizationId
 	public name: string
+	public description?: string
 	public expectedStart?: Time
 	public expectedDuration?: number
 	public metaData?: {
