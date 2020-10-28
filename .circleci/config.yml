@@ -43,7 +43,7 @@ jobs:
       - checkout
       - run:
           name: Run tests and send coverage
-          command: cd meteor && meteor npm install && meteor npm run postinstall && meteor npm run ci
+          command: cd meteor && meteor npm install && meteor npm run ci
           no_output_timeout: 60m
   lint-core:
     docker:
@@ -219,7 +219,8 @@ workflows:
               node-version:
                 - '10'
                 - '12'
-                - latest
+                - '14'
+                - latest # currently 15
           filters:
             tags:
               only: /v.*/
