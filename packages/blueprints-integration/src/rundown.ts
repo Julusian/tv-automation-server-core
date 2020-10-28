@@ -22,6 +22,9 @@ export interface IBlueprintRundown {
 	/** Rundown slug - user-presentable name */
 	name: string
 
+	/** Rundown description: Longer user-presentable description of the rundown */
+	description?: string
+
 	/** Expected start should be set to the expected time this rundown should run on air */
 	expectedStart?: Time
 	/** Expected duration of the rundown */
@@ -281,6 +284,11 @@ export interface IBlueprintPieceDB extends IBlueprintPiece {
 }
 export interface IBlueprintPieceInstance {
 	_id: string
+
+	/** If this piece has been created play-time using an AdLibPiece, this should be set to it's source piece */
+	adLibSourceId?: string
+	/** If this piece has been insterted during run of rundown (such as adLibs), then this is set to the timestamp it was inserted */
+	dynamicallyInserted?: Time
 
 	piece: IBlueprintPieceDB
 }
