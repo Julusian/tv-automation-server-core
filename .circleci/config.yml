@@ -217,10 +217,11 @@ workflows:
                 - blueprints-integration
                 - server-core-integration
               node-version:
-                - '10'
+                # TODO temporary for iteration speed
+                # - '10'
                 - '12'
-                - '14'
-                - latest # currently 15
+                # - '14'
+                # - latest # currently 15
           filters:
             tags:
               only: /v.*/
