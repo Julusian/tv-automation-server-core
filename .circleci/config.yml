@@ -399,7 +399,7 @@ workflows:
             - test-libs
             - validate-prod-dependencies-core
             - validate-prod-dependencies-libs
-            - build
+            - build-core
           filters:
             tags:
               only: /v.*/
@@ -407,7 +407,7 @@ workflows:
               ignore: /.*/
       - publish-branch:
           requires:
-            - build
+            - build-core
           filters:
             tags:
               ignore: /.*/
