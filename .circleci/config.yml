@@ -43,7 +43,7 @@ jobs:
       - checkout
       - run:
           name: Run tests and send coverage
-          command: cd meteor && meteor npm install && meteor npm run prepareForTest && meteor npm run ci
+          command: cd meteor && meteor npm install && meteor npm run postinstall && meteor npm run ci
           no_output_timeout: 60m
   lint-core:
     docker:
@@ -55,8 +55,21 @@ jobs:
           command: cd meteor && meteor npm install && meteor npm run ci:lint
           no_output_timeout: 15m
 
+  lint-libs:
+    parameters:
+      lib-name:
+        type: string
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - run: cd packages && yarn install
+      - run:
+          name: Run linter
+          command: cd packages/<< parameters.lib-name >> && yarn lint
+          no_output_timeout: 60m
+
   test-libs:
-    # name: test-<< matrix.lib-name >>
     parameters:
       lib-name:
         type: string
@@ -67,7 +80,7 @@ jobs:
       - checkout
       - run: cd packages && yarn install
       - run:
-          name: Run tests and send coverage
+          name: Run tests
           command: cd packages/<< parameters.lib-name >> && yarn test
           no_output_timeout: 60m
       - when: 
@@ -207,6 +220,18 @@ workflows:
               only: /v.*/
             branches:
               only: /.*/
+      - lint-libs:
+          matrix:
+            parameters:
+              lib-name:
+                - blueprints-integration
+                - server-core-integration
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only: /.*/
+
 
       - publish-tag:
           requires:
