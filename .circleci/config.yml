@@ -100,11 +100,20 @@ jobs:
     working_directory: ~/project
     steps:
       - checkout
+      - run:
+          name: Check release is desired
+          # TODO - or if something changed? perhaps always on the releaseX branches?
+          command: |
+            if ! git log --format=oneline -n 1 | grep -q "\[publish\]"; then
+              echo "Skip"
+              circleci-agent step halt
+            else
+              echo "Publish prerelease"
+            fi
       - run: 
           name: yarn install
           command: cd packages && yarn
       # Locally bump the version
-      # TODO - only when labelled as [publish] and if something changed?
       - run: 
           name: yarn release
           command: |
@@ -162,27 +171,7 @@ jobs:
       - run: 
           name: yarn build
           command: cd packages/<< parameters.lib-name >> && yarn build
-      # # Setup git
-      # - add_ssh_keys:
-      #     fingerprints:
-      #       - "ba:9e:70:ce:7e:1f:6c:cd:20:2e:ac:e7:ae:48:20:09"
-      # - run: mkdir -p ~/.ssh
-      # - run:
-      #     name: Keyscan Github
-      #     command: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-      # - run: git config --global user.email "info@superfly.tv"
-      # - run: git config --global user.name "superflytvab"
-      # # Publish docs
-      # - run: 
-      #     name: yarn docs:publish
-      #     command: |
-      #       if [[ $PUBLISH_ARGS == *"latest"* ]]; then
-      #         echo "Publishing docs"
-      #         yarn docs:publish 
-      #       else
-      #         echo "Skipping docs"
-      #       fi
-      # Publish npm
+      # TODO - typedoc? can that work with multiple projects and one output?
       - run:
           name: Write NPM Token to ~/.npmrc
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
@@ -190,8 +179,54 @@ jobs:
           name: Publish to NPM with yarn
           command: cd packages/<< parameters.lib-name >> && NEW_VERSION=$(node -p "require('./package.json').version") && yarn publish --access=public --new-version=$NEW_VERSION --network-timeout 100000 $PUBLISH_ARGS
             
-  # TODO - do these cover the libs sufficiently? or do those need dedicated steps?
-  validate-prod-dependencies:
+  validate-prod-dependencies-libs:
+    parameters:
+      lib-name:
+        type: string
+    docker:
+      - image: circleci/node:12
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASS
+    working_directory: ~/project
+    steps:
+      - checkout
+      - run: 
+          name: yarn install
+          command: cd packages && yarn
+      - run:
+          name: Validate production dependencies
+          command: |
+            cd packages/<< parameters.lib-name >>
+            if ! git log --format=oneline -n 1 | grep -q "\[ignore-audit\]"; then
+              yarn validate:dependencies
+            else
+              echo "Skipping audit"
+            fi
+
+  validate-all-dependencies-libs:
+    parameters:
+      lib-name:
+        type: string
+    docker:
+      - image: circleci/node:12
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASS
+    working_directory: ~/project
+    steps:
+      - checkout
+      - run: 
+          name: yarn install
+          command: cd packages && yarn
+      - run:
+          name: Validate production dependencies
+          command: cd packages/<< parameters.lib-name >> && yarn validate:dependencies
+      - run:
+          name: Validate dev dependencies
+          command: cd packages/<< parameters.lib-name >> && yarn validate:dev-dependencies
+
+  validate-prod-dependencies-core:
     docker:
       - image: sofietv/tv-automation-meteor-base:1.11.1
     steps:
@@ -200,7 +235,7 @@ jobs:
           name: Validate production dependencies for vulnerabilities and compatible licenses
           command: cd meteor && meteor npm install && meteor npm run postinstall && meteor npm run validate:prod-dependencies
           no_output_timeout: 15m
-  validate-all-dependencies:
+  validate-all-dependencies-core:
     docker:
       - image: sofietv/tv-automation-meteor-base:1.11.1
     steps:
@@ -277,13 +312,35 @@ workflows:
   version: 2
   build-test-publish:
     jobs:
-      - validate-all-dependencies:
+      - validate-all-dependencies-core:
           filters:
             tags:
               only: /v.*/
             branches:
               only: /.*/
-      - validate-prod-dependencies:
+      - validate-prod-dependencies-core:
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only: /.*/
+      - validate-all-dependencies-libs:
+          matrix:
+            parameters:
+              lib-name:
+                - blueprints-integration
+                - server-core-integration
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only: /.*/
+      - validate-prod-dependencies-libs:
+          matrix:
+            parameters:
+              lib-name:
+                - blueprints-integration
+                - server-core-integration
           filters:
             tags:
               only: /v.*/
@@ -342,7 +399,8 @@ workflows:
           requires:
             - test-core
             - test-libs
-            - validate-prod-dependencies
+            - validate-prod-dependencies-core
+            - validate-prod-dependencies-libs
             # - build
           filters:
             tags:

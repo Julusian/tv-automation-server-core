@@ -11,11 +11,6 @@
 		"sourceMap": true,
 		"allowJs": false,
 		"lib": ["dom", "es6", "dom.iterable", "scripthost", "es2017", "es2018"]
-
-		// "paths": {
-		// 	"tv-automation-sofie-blueprints-integration": ["../packages/blueprints-integration/src/index.ts"]
-		// },
-		// "baseUrl": "./"
 	},
 	"include": ["client/**/*", "server/**/*", "lib/**/*", "__mocks__/**/*", "tslint-rules/**/*"],
 	"exclude": ["node_modules", "**/.coverage/**/*"]
