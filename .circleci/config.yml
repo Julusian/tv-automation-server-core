@@ -73,9 +73,10 @@ jobs:
     parameters:
       lib-name:
         type: string
+      node-version:
+        type: string
     docker:
-      # TODO - multiple node versions?
-      - image: circleci/node:12
+      - image: circleci/node:<< parameters.node-version >>
     steps:
       - checkout
       - run: cd packages && yarn install
@@ -84,7 +85,7 @@ jobs:
           command: cd packages/<< parameters.lib-name >> && yarn test
           no_output_timeout: 60m
       - when: 
-          condition: 12 != 12
+          condition: << parameters.node-version >> == 12 # run for the 'main' version
           steps:
             - run:
                 name: Send coverage
@@ -215,6 +216,10 @@ workflows:
               lib-name:
                 - blueprints-integration
                 - server-core-integration
+              node-version:
+                - '10'
+                - '12'
+                - latest
           filters:
             tags:
               only: /v.*/
