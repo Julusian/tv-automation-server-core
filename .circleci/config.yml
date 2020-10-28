@@ -1,6 +1,6 @@
-version: 2
+version: 2.1
 jobs:
-  build:
+  build-core:
     docker:
       - image: sofietv/tv-automation-meteor-base:1.11.1
     steps:
@@ -36,7 +36,7 @@ jobs:
           paths:
             - .
 
-  tests:
+  test-core:
     docker:
       - image: sofietv/tv-automation-meteor-base:1.11.1
     steps:
@@ -45,7 +45,7 @@ jobs:
           name: Run tests and send coverage
           command: cd meteor && meteor npm install && meteor npm run prepareForTest && meteor npm run ci
           no_output_timeout: 60m
-  lint:
+  lint-core:
     docker:
       - image: sofietv/tv-automation-meteor-base:1.11.1
     steps:
@@ -54,6 +54,29 @@ jobs:
           name: Typecheck and lint code
           command: cd meteor && meteor npm install && meteor npm run ci:lint
           no_output_timeout: 15m
+
+  test-libs:
+    # name: test-<< matrix.lib-name >>
+    parameters:
+      lib-name:
+        type: string
+    docker:
+      # TODO - multiple node versions?
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - run: cd packages && yarn install
+      - run:
+          name: Run tests and send coverage
+          command: cd test-<< parameters.lib-name >> && yarn test
+          no_output_timeout: 60m
+      - when: 
+          condition: 12 != 12
+          steps:
+            - run:
+                name: Send coverage
+                command: yarn send-coverage
+            
 
   validate-prod-dependencies:
     docker:
@@ -153,37 +176,52 @@ workflows:
               only: /v.*/
             branches:
               only: /.*/
-      - build:
+      # TODO temporary for iteration speed
+      # - build-core:
+      #     filters:
+      #       tags:
+      #         only: /v.*/
+      #       branches:
+      #         only: /.*/
+      - lint-core:
           filters:
             tags:
               only: /v.*/
             branches:
               only: /.*/
-      - lint:
+      - test-core:
           filters:
             tags:
               only: /v.*/
             branches:
               only: /.*/
-      - tests:
+
+      - test-libs:
+          matrix:
+            parameters:
+              lib-name:
+                - blueprints-integration
+                - server-core-integration
           filters:
             tags:
               only: /v.*/
             branches:
               only: /.*/
+
       - publish-tag:
           requires:
-            - tests
+            - test-core
+            - test-libs
             - validate-prod-dependencies
-            - build
+            # - build
           filters:
             tags:
               only: /v.*/
             branches:
               ignore: /.*/
       - publish-branch:
-          requires:
-            - build
+          # requires:
+          #   - build
           filters:
             tags:
               ignore: /.*/
