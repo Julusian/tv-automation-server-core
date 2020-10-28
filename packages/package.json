@@ -5,7 +5,9 @@
       "blueprints-integration",
       "server-core-integration"
     ],
-    "nohoist": ["**/timeline-state-resolver-types"]
+    "nohoist": [
+      "**/timeline-state-resolver-types"
+    ]
   },
   "scripts": {
     "build": "yarn workspaces run build",
