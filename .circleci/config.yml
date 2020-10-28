@@ -68,7 +68,7 @@ jobs:
       - run: cd packages && yarn install
       - run:
           name: Run tests and send coverage
-          command: cd test-<< parameters.lib-name >> && yarn test
+          command: cd << parameters.lib-name >> && yarn test
           no_output_timeout: 60m
       - when: 
           condition: 12 != 12
