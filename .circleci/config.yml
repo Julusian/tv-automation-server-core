@@ -346,13 +346,12 @@ workflows:
               only: /v.*/
             branches:
               only: /.*/
-      # TODO temporary for iteration speed
-      # - build-core:
-      #     filters:
-      #       tags:
-      #         only: /v.*/
-      #       branches:
-      #         only: /.*/
+      - build-core:
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only: /.*/
       - lint-core:
           filters:
             tags:
@@ -373,10 +372,9 @@ workflows:
                 - blueprints-integration
                 - server-core-integration
               node-version:
-                # TODO temporary for iteration speed
-                # - '10'
+                - '10'
                 - '12'
-                # - '14'
+                - '14'
                 # - latest # currently 15
           filters:
             tags:
@@ -401,15 +399,15 @@ workflows:
             - test-libs
             - validate-prod-dependencies-core
             - validate-prod-dependencies-libs
-            # - build
+            - build
           filters:
             tags:
               only: /v.*/
             branches:
               ignore: /.*/
       - publish-branch:
-          # requires:
-          #   - build
+          requires:
+            - build
           filters:
             tags:
               ignore: /.*/
