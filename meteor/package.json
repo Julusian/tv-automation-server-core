@@ -35,8 +35,8 @@
 		"i18n-compile-json-nn": "i18next-conv -l nn -s i18n/nn.po -t public/locales/nn/translations.json --skipUntranslated",
 		"i18n-compile-json-sv": "i18next-conv -l sv -s i18n/sv.po -t public/locales/sv/translations.json --skipUntranslated",
 		"visualize": "meteor --production --extra-packages bundle-visualizer",
-		"release": "standard-version",
-		"prepareChangelog": "standard-version --prerelease",
+		"release": "standard-version --commit-all",
+		"prepareChangelog": "npm run release -- --prerelease",
 		"validate:all-dependencies": "npm run validate:prod-dependencies && npm run validate:dev-dependencies && npm run license-validate",
 		"validate:prod-dependencies": "npm audit --production",
 		"validate:dev-dependencies": "npm audit --only=dev --audit-level=moderate",
@@ -177,6 +177,11 @@
 		"mainModule": {
 			"client": "client/main.tsx",
 			"server": "server/main.ts"
+		}
+	},
+	"standard-version": {
+		"scripts": {
+			"postbump": "node scripts/sync-package-versions.js && git add ../packages/*/package.json ../packages/*/CHANGELOG.md"
 		}
 	}
 }

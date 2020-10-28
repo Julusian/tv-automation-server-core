@@ -89,9 +89,10 @@ jobs:
           steps:
             - run:
                 name: Send coverage
+                # TODO paths from here end up a bit wrong
                 command: cd packages/<< parameters.lib-name >> && yarn send-coverage
             
-
+  # TODO - do these cover the libs sufficiently? or do those need dedicated steps?
   validate-prod-dependencies:
     docker:
       - image: sofietv/tv-automation-meteor-base:1.11.1
@@ -99,7 +100,7 @@ jobs:
       - checkout
       - run:
           name: Validate production dependencies for vulnerabilities and compatible licenses
-          command: cd meteor && meteor npm install && meteor npm run validate:prod-dependencies
+          command: cd meteor && meteor npm install && meteor npm run postinstall && meteor npm run validate:prod-dependencies
           no_output_timeout: 15m
   validate-all-dependencies:
     docker:
@@ -108,7 +109,7 @@ jobs:
       - checkout
       - run:
           name: Validate all dependencies for vulnerabilities
-          command: cd meteor && meteor npm install && meteor npm run validate:all-dependencies
+          command: cd meteor && meteor npm install && meteor npm run postinstall && meteor npm run validate:all-dependencies
           no_output_timeout: 15m
 
   publish-tag:
@@ -174,6 +175,10 @@ jobs:
               docker push docker.pkg.github.com/$GITHUB_IMAGE:$CIRCLE_BRANCH
             fi
 
+# TODO - publish release libs
+# TODO - publish pre-release libs
+# TODO - publish dev libs
+
 workflows:
   version: 2
   build-test-publish:
@@ -238,7 +243,6 @@ workflows:
               only: /v.*/
             branches:
               only: /.*/
-
 
       - publish-tag:
           requires:
