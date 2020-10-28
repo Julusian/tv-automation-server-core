@@ -23,7 +23,7 @@
 		"ci:lint": "meteor npm run postinstall && meteor npm run libs:build && meteor npm run check-types && meteor npm run lint",
 		"cov-open": "open-cli coverage/lcov-report/index.html",
 		"cov": "meteor npm run unitcov && meteor npm run cov-open",
-		"send-coverage": "codecov",
+		"send-coverage": "codecov -p ..",
 		"test-i": "npm run integration-test",
 		"license-validate": "node ../scripts/checkLicenses.js -r --filter MIT --filter BSD --filter ISC --filter Apache --filter Unlicense --plain --border ascii",
 		"lint": "tslint --project tsconfig.json --config tslint.json",
