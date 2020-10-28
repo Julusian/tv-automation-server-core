@@ -68,14 +68,14 @@ jobs:
       - run: cd packages && yarn install
       - run:
           name: Run tests and send coverage
-          command: cd << parameters.lib-name >> && yarn test
+          command: cd packages/<< parameters.lib-name >> && yarn test
           no_output_timeout: 60m
       - when: 
           condition: 12 != 12
           steps:
             - run:
                 name: Send coverage
-                command: yarn send-coverage
+                command: cd packages/<< parameters.lib-name >> && yarn send-coverage
             
 
   validate-prod-dependencies:
