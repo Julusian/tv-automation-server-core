@@ -101,38 +101,38 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
-    # - name: Install meteor
-    #   run: curl "https://install.meteor.com/?release=1.11.1" | sh
-    # - name: restore node_modules
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: |
-    #       meteor/node_modules
-    #     key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-    # - name: Meteor Build
-    #   run: |
-    #     cd meteor
-    #     meteor npm install
-    #     NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
-    # - name: Meteor Bundle NPM Build
-    #   run: |
-    #     cd meteor/bundle/programs/server
-    #     meteor npm install
-    # - name: Upload artifacts
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: server-bundle
-    #     path: |
-    #       meteor/bundle
-    #       Dockerfile.circle
+    - name: Install meteor
+      run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    - name: restore node_modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          meteor/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Meteor Build
+      run: |
+        cd meteor
+        meteor npm install
+        NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
+    - name: Meteor Bundle NPM Build
+      run: |
+        cd meteor/bundle/programs/server
+        meteor npm install
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: server-bundle
+        path: |
+          meteor/bundle
+          Dockerfile.circle
     - name: Determine images to publish
       id: image-tags
       run: |
-        # DOCKERHUB_PUBLISH=$([[ ! -z "${{ secrets.DOCKERHUB_IMAGE }}" ]] && echo "1" || echo "0")
         IMAGES=
 
         GIT_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
+        # If we have a dockerhub image name, then setup to publish there
         if [ -z "${{ secrets.DOCKERHUB_IMAGE }}" ]
         then
           DOCKERHUB_PUBLISH="0"
@@ -141,6 +141,7 @@ jobs:
           IMAGES="${{ secrets.DOCKERHUB_IMAGE }}:$GIT_REF"$'\n'$IMAGES
         fi
 
+        # debug output
         echo dockerhub-publish $DOCKERHUB_PUBLISH
         echo images $IMAGES
 
@@ -156,7 +157,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    # TODO - do we want this
+    # TODO - do we want this?
     # - name: Login to GitHub Container Registry
     #   uses: docker/login-action@v1 
     #   with:
