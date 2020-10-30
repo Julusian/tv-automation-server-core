@@ -138,7 +138,7 @@ jobs:
           DOCKERHUB_PUBLISH="0"
         else
           DOCKERHUB_PUBLISH="1"
-          IMAGES=$'$IMAGES\n${{ secrets.DOCKERHUB_IMAGE }}:$GIT_REF'
+          IMAGES=$IMAGES$'\n'"${{ secrets.DOCKERHUB_IMAGE }}:$GIT_REF"
         fi
 
         echo dockerhub-publish $DOCKERHUB_PUBLISH
