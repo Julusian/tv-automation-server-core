@@ -131,7 +131,7 @@ jobs:
         USE_DOCKERHUB=$([[ ! -z "${{ secrets.DOCKERHUB_TOKEN }}" ]] && echo "1")
         IMAGES="test1/thingy:latest test2/another:latest"
         echo ::set-output name=images::"$IMAGES"
-        echo ::set-output name=use-dockerhub::$USE_DOCKERHUB
+        echo ::set-output name=use-dockerhub::"$USE_DOCKERHUB"
     - name: Test use images
       if: ${{ steps.image-tags.outputs.images }}
       run: echo "${{ steps.image-tags.outputs.images }}"
