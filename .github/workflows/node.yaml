@@ -129,7 +129,7 @@ jobs:
       id: image-tags
       run: |
         USE_DOCKERHUB=$([[ ! -z "${{ secrets.DOCKERHUB_TOKEN }}" ]] && echo "1" || echo "0")
-        IMAGES="test1/thingy:latest test2/another:latest"
+        IMAGES="test1/thingy:latest\ntest2/another:latest"
         echo ::set-output name=images::"$IMAGES"
         echo ::set-output name=use-dockerhub::"$USE_DOCKERHUB"
     - name: Test use images
