@@ -101,30 +101,23 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
-    - name: Install meteor
-      run: curl "https://install.meteor.com/?release=1.11.1" | sh
-    - name: restore node_modules
-      uses: actions/cache@v2
-      with:
-        path: |
-          meteor/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-    - name: Meteor Build
-      run: |
-        cd meteor
-        meteor npm install
-        NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
-    - name: Meteor Bundle NPM Build
-      run: |
-        cd meteor/bundle/programs/server
-        meteor npm install
-    # - name: Upload artifacts
-    #   uses: actions/upload-artifact@v2
+    # - name: Install meteor
+    #   run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    # - name: restore node_modules
+    #   uses: actions/cache@v2
     #   with:
-    #     name: server-bundle
     #     path: |
-    #       meteor/bundle
-    #       Dockerfile.circle
+    #       meteor/node_modules
+    #     key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    # - name: Meteor Build
+    #   run: |
+    #     cd meteor
+    #     meteor npm install
+    #     NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
+    # - name: Meteor Bundle NPM Build
+    #   run: |
+    #     cd meteor/bundle/programs/server
+    #     meteor npm install
     - name: Get the Docker tag
       id: docker-tag
       uses: yuya-takeyama/docker-tag-from-github-ref-action@2b0614b1338c8f19dd9d3ea433ca9bc0cc7057ba
