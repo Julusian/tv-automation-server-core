@@ -101,17 +101,10 @@ jobs:
         path: |
           meteor/node_modules
         key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-    - name: Run tests
-      run: |
-        cd meteor
-        meteor npm install
-        meteor npm run prepareForTest
-        meteor npm run ci
-      env:
-        CI: true
     - name: Meteor Build
       run: |
         cd meteor
+        meteor npm install
         NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
     - name: Meteor Bundle NPM Build
       run: |
