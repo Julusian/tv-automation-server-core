@@ -18,7 +18,7 @@ jobs:
       with:
         path: |
           meteor/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
     - name: Run typecheck and linter
       run: |
         cd meteor
@@ -38,8 +38,8 @@ jobs:
       with:
         path: |
           meteor/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}
-    - name: Run typecheck and linter
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Run tests
       run: |
         cd meteor
         meteor npm install
