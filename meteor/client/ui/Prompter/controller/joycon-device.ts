@@ -1,5 +1,6 @@
 import { ControllerAbstract } from './lib'
 import { PrompterViewInner } from '../PrompterView'
+import interpolatingPolynomial from 'interpolating-polynomial'
 
 const LOCALSTORAGEMODE = 'prompter-controller-arrowkeys'
 
@@ -10,12 +11,13 @@ export class JoyConController extends ControllerAbstract {
 	private prompterView: PrompterViewInner
 	private joycons: Gamepad[] = []
 
-	private readonly deadBand = .25	// ignore all input within this range. Used to separate out the active joycon when both are connected
+	private readonly deadBand = 0.25 // ignore all input within this range. Used to separate out the active joycon when both are connected
 	private readonly rangeRevMin = -1 // pedal "all back" position, the max-reverse-position
-	private readonly rangeNeutralMin = -.25 // pedal "back" position where reverse-range transistions to the neutral range
-	private readonly rangeNeutralMax = .25 // pedal "front" position where scrolling starts, the 0 speed origin
+	private readonly rangeNeutralMin = -0.25 // pedal "back" position where reverse-range transistions to the neutral range
+	private readonly rangeNeutralMax = 0.25 // pedal "front" position where scrolling starts, the 0 speed origin
 	private readonly rangeFwdMax = 1 // pedal "all front" position where scrolling is maxed out
 	private readonly speedMap = [1, 2, 3, 4, 5, 8, 12, 30]
+	private speedFunction: (x: number) => number
 
 	// private direction: 'backwards' | 'neutral' | 'forwards' = 'neutral'
 	private updateSpeedHandle: number | null = null
@@ -25,7 +27,7 @@ export class JoyConController extends ControllerAbstract {
 	constructor(view: PrompterViewInner) {
 		super(view)
 		const { rangeRevMin, rangeNeutralMin, rangeNeutralMax, rangeFwdMax } = this
-		
+
 		this.prompterView = view
 
 		// validate range settings
@@ -43,12 +45,19 @@ export class JoyConController extends ControllerAbstract {
 			return
 		}
 
-		window.addEventListener('gamepadconnected',  this.updateScrollPosition.bind(this))
+		window.addEventListener('gamepadconnected', this.updateScrollPosition.bind(this))
 		window.addEventListener('gamepaddisconnected', this.updateScrollPosition.bind(this))
+
+		this.speedFunction = interpolatingPolynomial(
+			// create the input data set for the polynomial - divide the forward range into speedMap.length number of points
+			this.speedMap.map((y, index, array) => [
+				((this.rangeFwdMax - this.rangeNeutralMax) / array.length) * index + this.rangeNeutralMax,
+				y,
+			])
+		)
 	}
 
-	public destroy() {
-	}
+	public destroy() {}
 	public onKeyDown(e: KeyboardEvent) {
 		// Nothing
 	}
@@ -67,7 +76,7 @@ export class JoyConController extends ControllerAbstract {
 
 	private checkIfWeHaveConnectedJoyCons() {
 		this.joycons = []
-		if(navigator.getGamepads) {
+		if (navigator.getGamepads) {
 			for (const o of navigator.getGamepads()) {
 				if (o !== null && o.connected && o.id && typeof o.id === 'string' && o.id.match('Joy-Con')) {
 					this.joycons.push(o)
@@ -78,21 +87,23 @@ export class JoyConController extends ControllerAbstract {
 
 	private getActiveAisOfJoycons() {
 		const pad = this.joycons[0]
-		
-		if (pad.axes.length === 2) { // L or R mode
+
+		if (pad.axes.length === 2) {
+			// L or R mode
 			if (Math.abs(pad.axes[0]) > this.deadBand) {
 				if (pad.id && typeof pad.id === 'string') {
-					if(pad.id.match('(L)')) {
+					if (pad.id.match('(L)')) {
 						return pad.axes[0] * -1 // in this mode, L is "negative"
-					} else if(pad.id.match('(R)')) {
+					} else if (pad.id.match('(R)')) {
 						return pad.axes[0] // in this mode, R is "positive"
 					}
 				}
 			}
-		} else if (pad.axes.length === 4) { // L + R mode
+		} else if (pad.axes.length === 4) {
+			// L + R mode
 			// get the first one that is moving outside of the deadband, priorotizing the L controller
 			if (Math.abs(pad.axes[1]) > this.deadBand) {
-				return pad.axes[1] * -1	 // in this mode, we are "negative" on both sticks....
+				return pad.axes[1] * -1 // in this mode, we are "negative" on both sticks....
 			}
 			if (Math.abs(pad.axes[3]) > this.deadBand) {
 				return pad.axes[3] * -1 // in this mode, we are "negative" on both sticks....
@@ -103,7 +114,7 @@ export class JoyConController extends ControllerAbstract {
 
 		return 0
 	}
-	
+
 	private getSpeedFromJoycons() {
 		const { rangeRevMin, rangeNeutralMin, rangeNeutralMax, rangeFwdMax } = this
 		let inputValue = this.getActiveAisOfJoycons()
@@ -113,17 +124,19 @@ export class JoyConController extends ControllerAbstract {
 
 		if (inputValue >= rangeRevMin && inputValue <= rangeNeutralMin) {
 			// find the position within the backwards range
-			const rangePosition = (rangeNeutralMin - inputValue) / (rangeNeutralMin - rangeRevMin) // how far, 0.0-1.0, within the range are we?
-			const rangeIndex = Math.ceil(rangePosition * this.speedMap.length) - 1 // maps 0-1 to 0-n where n = .lenght of the array
-			this.lastSpeed = this.speedMap[rangeIndex] * -1 // applies the speed as a negative value to reverse
+			// const rangePosition = (rangeNeutralMin - inputValue) / (rangeNeutralMin - rangeRevMin) // how far, 0.0-1.0, within the range are we?
+			// const rangeIndex = Math.ceil(rangePosition * this.speedMap.length) - 1 // maps 0-1 to 0-n where n = .lenght of the array
+			// this.lastSpeed = this.speedMap[rangeIndex] * -1 // applies the speed as a negative value to reverse
+			this.lastSpeed = Math.round(-1 * this.speedFunction(inputValue * -1))
 		} else if (inputValue >= rangeNeutralMin && inputValue <= rangeNeutralMax) {
 			// we're in the neutral zone
 			this.lastSpeed = 0
 		} else if (inputValue >= rangeNeutralMax && inputValue <= rangeFwdMax) {
 			// find the position within the forward range
-			const rangePosition = (inputValue - rangeNeutralMax) / (rangeFwdMax - rangeNeutralMax) // how far, 0.0-1.0, within the range are we?
-			const rangeIndex = Math.ceil(rangePosition * this.speedMap.length) - 1 // maps 0-1 to 0-n where n = .lenght of the array
-			this.lastSpeed = this.speedMap[rangeIndex] // applies the speed
+			// const rangePosition = (inputValue - rangeNeutralMax) / (rangeFwdMax - rangeNeutralMax) // how far, 0.0-1.0, within the range are we?
+			// const rangeIndex = Math.ceil(rangePosition * this.speedMap.length) - 1 // maps 0-1 to 0-n where n = .lenght of the array
+			// this.lastSpeed = this.speedMap[rangeIndex] // applies the speed
+			this.lastSpeed = Math.round(this.speedFunction(inputValue))
 		} else {
 			// we should never be able to hit this due to validation above
 			console.error(`Illegal input value ${inputValue}`)
