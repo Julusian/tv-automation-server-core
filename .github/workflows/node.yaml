@@ -101,14 +101,14 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
-    - name: Install meteor
-      run: curl "https://install.meteor.com/?release=1.11.1" | sh
-    - name: restore node_modules
-      uses: actions/cache@v2
-      with:
-        path: |
-          meteor/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    # - name: Install meteor
+    #   run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    # - name: restore node_modules
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: |
+    #       meteor/node_modules
+    #     key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
     # - name: Meteor Build
     #   run: |
     #     cd meteor
@@ -129,7 +129,7 @@ jobs:
       id: image-tags
       run: |
         IMAGES=test1/thingy:latest test2/another:latest
-        echo "::set-output name=images::$IMAGES"
+        echo "::set-output name=images::\"$IMAGES\""
     - name: Test use images
       if: ${{ steps.image-tags.outputs.images }}
       run: echo "${{ steps.image-tags.outputs.images }}"
