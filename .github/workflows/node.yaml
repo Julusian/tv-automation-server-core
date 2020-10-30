@@ -128,8 +128,8 @@ jobs:
     - name: Determine images to publish
       id: image-tags
       run: |
-        IMAGES=test1/thingy:latest test2/another:latest
-        echo "::set-output name=images::\"$IMAGES\""
+        IMAGES="test1/thingy:latest test2/another:latest"
+        echo ::set-output name=images::"$IMAGES"
     - name: Test use images
       if: ${{ steps.image-tags.outputs.images }}
       run: echo "${{ steps.image-tags.outputs.images }}"
