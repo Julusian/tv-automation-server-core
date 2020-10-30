@@ -128,7 +128,7 @@ jobs:
     - name: Determine images to publish
       id: image-tags
       run: |
-        DOCKERHUB_PUBLISH=$([[ ! -z "${{ secrets.DOCKERHUB_IMAGE }}" ]] && echo "1" || echo "0")
+        # DOCKERHUB_PUBLISH=$([[ ! -z "${{ secrets.DOCKERHUB_IMAGE }}" ]] && echo "1" || echo "0")
         IMAGES=$''
 
         GIT_REF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
@@ -140,6 +140,9 @@ jobs:
         else
           DOCKERHUB_PUBLISH="0"
         fi
+
+        echo dockerhub-publish $DOCKERHUB_PUBLISH
+        echo images $IMAGES
 
         echo ::set-output name=images::"$IMAGES"
         echo ::set-output name=dockerhub-publish::"$DOCKERHUB_PUBLISH"
