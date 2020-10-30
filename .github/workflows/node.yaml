@@ -118,13 +118,13 @@ jobs:
       run: |
         cd meteor/bundle/programs/server
         meteor npm install
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: server-bundle
-        path: |
-          meteor/bundle
-          Dockerfile.circle
+    # - name: Upload artifacts
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: server-bundle
+    #     path: |
+    #       meteor/bundle
+    #       Dockerfile.circle
     - name: Determine images to publish
       id: image-tags
       run: |
