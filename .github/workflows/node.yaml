@@ -4,120 +4,122 @@ on:
   push:
     branches:
       - '**'
+    # TODO - same workflow for a tag?
 
 jobs:
-  # lint:
-  #   name: Typecheck and Lint
-  #   runs-on: ubuntu-latest
-  #   continue-on-error: true
-  #   timeout-minutes: 15
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Install meteor
-  #     run: curl "https://install.meteor.com/?release=1.11.1" | sh
-  #   - name: restore node_modules
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         meteor/node_modules
-  #       key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-  #   - name: Run typecheck and linter
-  #     run: |
-  #       cd meteor
-  #       meteor npm install
-  #       meteor npm run ci:lint
-  #     env:
-  #       CI: true
-  # test:
-  #   name: Tests
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 30
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Install meteor
-  #     run: curl "https://install.meteor.com/?release=1.11.1" | sh
-  #   - name: restore node_modules
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         meteor/node_modules
-  #       key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-  #   - name: Run tests
-  #     run: |
-  #       cd meteor
-  #       meteor npm install
-  #       meteor npm run prepareForTest
-  #       meteor npm run ci
-  #     env:
-  #       CI: true
-
-  # validate-prod-dependencies:
-  #   name: Validate production dependencies
-  #   runs-on: ubuntu-latest
-  #   continue-on-error: true
-  #   timeout-minutes: 15
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Install meteor
-  #     run: curl "https://install.meteor.com/?release=1.11.1" | sh
-  #   - name: restore node_modules
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         meteor/node_modules
-  #       key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-  #   - name: Validate production dependencies for vulnerabilities and compatible licenses
-  #     run: |
-  #       cd meteor
-  #       meteor npm install
-  #       meteor npm run validate:prod-dependencies
-  #     env:
-  #       CI: true
-  # validate-all-dependencies:
-  #   name: Validate all dependencies
-  #   runs-on: ubuntu-latest
-  #   continue-on-error: true
-  #   timeout-minutes: 15
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Install meteor
-  #     run: curl "https://install.meteor.com/?release=1.11.1" | sh
-  #   - name: restore node_modules
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: |
-  #         meteor/node_modules
-  #       key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-  #   - name: Validate all dependencies for vulnerabilities
-  #     run: |
-  #       cd meteor
-  #       meteor npm install
-  #       meteor npm run validate:all-dependencies
-  #     env:
-  #       CI: true
-  build:
-    name: Build
+  lint:
+    name: Typecheck and Lint
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install meteor
+      run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    - name: restore node_modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          meteor/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Run typecheck and linter
+      run: |
+        cd meteor
+        meteor npm install
+        meteor npm run ci:lint
+      env:
+        CI: true
+  test:
+    name: Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
-    # - name: Install meteor
-    #   run: curl "https://install.meteor.com/?release=1.11.1" | sh
-    # - name: restore node_modules
-    #   uses: actions/cache@v2
-    #   with:
-    #     path: |
-    #       meteor/node_modules
-    #     key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
-    # - name: Meteor Build
-    #   run: |
-    #     cd meteor
-    #     meteor npm install
-    #     NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
-    # - name: Meteor Bundle NPM Build
-    #   run: |
-    #     cd meteor/bundle/programs/server
-    #     meteor npm install
+    - name: Install meteor
+      run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    - name: restore node_modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          meteor/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Run tests
+      run: |
+        cd meteor
+        meteor npm install
+        meteor npm run prepareForTest
+        meteor npm run ci
+      env:
+        CI: true
+
+  validate-prod-dependencies:
+    name: Validate production dependencies
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install meteor
+      run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    - name: restore node_modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          meteor/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Validate production dependencies for vulnerabilities and compatible licenses
+      run: |
+        cd meteor
+        meteor npm install
+        meteor npm run validate:prod-dependencies
+      env:
+        CI: true
+  validate-all-dependencies:
+    name: Validate all dependencies
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install meteor
+      run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    - name: restore node_modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          meteor/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Validate all dependencies for vulnerabilities
+      run: |
+        cd meteor
+        meteor npm install
+        meteor npm run validate:all-dependencies
+      env:
+        CI: true
+  build:
+    # TODO - should this be dependant on tests or something passing if we are on a tag?
+    name: Build and publish docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install meteor
+      run: curl "https://install.meteor.com/?release=1.11.1" | sh
+    - name: restore node_modules
+      uses: actions/cache@v2
+      with:
+        path: |
+          meteor/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('meteor/package-lock.json') }}-${{ hashFiles('meteor/.meteor/release') }}
+    - name: Meteor Build
+      run: |
+        cd meteor
+        meteor npm install
+        NODE_OPTIONS="--max-old-space-size=4096" METEOR_DEBUG_BUILD=1 meteor build --allow-superuser --directory .
+    - name: Meteor Bundle NPM Build
+      run: |
+        cd meteor/bundle/programs/server
+        meteor npm install
     - name: Get the Docker tag
       id: docker-tag
       uses: yuya-takeyama/docker-tag-from-github-ref-action@2b0614b1338c8f19dd9d3ea433ca9bc0cc7057ba
@@ -127,7 +129,7 @@ jobs:
         IMAGES=
 
         DOCKER_TAG=${{ steps.docker-tag.outputs.tag }}
-        
+        # check if a release branch, or master, or a tag
         if [[ $DOCKER_TAG =~ ^release([0-9]+)$ || $DOCKER_TAG == "latest" || "${{ steps.docker-tag.outputs.tag }}" == refs/tags/* ]]
         then
           # If we have a dockerhub image name, then setup to publish there
